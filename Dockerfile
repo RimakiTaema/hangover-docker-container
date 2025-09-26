@@ -136,7 +136,7 @@ WM_PID=$!
 
 # Start VNC server
 echo "Starting VNC server on port $VNC_PORT..."
-x11vnc -display :1 -nopw -listen localhost -xkb -rfbport $VNC_PORT -forever &
+x11vnc -display :1 -rfbport 5901 -localhost -forever -shared -ncache 10 -passwd hangover
 VNC_PID=$!
 
 # Wait for VNC to start
