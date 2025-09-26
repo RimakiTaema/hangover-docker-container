@@ -11,66 +11,35 @@ ENV WINEPREFIX=/home/wine/.wine
 ENV DISPLAY=:1
 ENV VNC_PORT=5901
 
-# Install system dependencies
+# Install system dependencies (minimal runtime)
 RUN apt-get update && apt-get install -y \
-    # Basic tools
     wget \
     curl \
-    git \
     unzip \
     ca-certificates \
     gnupg \
     software-properties-common \
     tar \
-    # Wine dependencies
-    wine \
-    wine32 \
-    wine64 \
-    libwine \
-    libwine-dev \
-    # X11 and VNC for GUI support
     xvfb \
     x11vnc \
     fluxbox \
     xterm \
-    # Additional libraries
-    libc6-dev \
-    libgcc-s1 \
-    libstdc++6 \
     libx11-6 \
     libxext6 \
     libxrender1 \
     libxrandr2 \
-    libxss1 \
-    libxtst6 \
     libxi6 \
     libxinerama1 \
-    libxcomposite1 \
     libxcursor1 \
     libxdamage1 \
     libxfixes3 \
-    libxpm4 \
-    libxmu6 \
     libxft2 \
     libxau6 \
     libxdmcp6 \
-    libxss1 \
-    libxt6 \
-    libxaw7 \
-    libxmu6 \
-    libxpm4 \
-    libxrandr2 \
-    libxrender1 \
-    libxss1 \
-    libxtst6 \
-    libxxf86vm1 \
-    # Fonts
     fonts-dejavu-core \
     fonts-liberation \
-    # Network tools
     net-tools \
     iputils-ping \
-    # Process management
     supervisor \
     && rm -rf /var/lib/apt/lists/*
 
@@ -79,16 +48,7 @@ RUN useradd -m -s /bin/bash wine && \
     echo "wine:wine" | chpasswd && \
     usermod -aG audio wine
 
-# Install Box64
-RUN wget https://github.com/ptitSeb/box64/releases/download/v0.2.6/box64_0.2.6_arm64.deb && \
-    dpkg -i box64_0.2.6_arm64.deb || apt-get install -f -y && \
-    rm box64_0.2.6_arm64.deb
-
-# Install FEX (for x86_64 emulation)
-RUN wget https://github.com/FEX-Emu/FEX/releases/download/FEX-2409/FEX-2409-Ubuntu-22.04-aarch64.tar.xz && \
-    tar -xf FEX-2409-Ubuntu-22.04-aarch64.tar.xz && \
-    cp -r FEX-2409-Ubuntu-22.04-aarch64/* /usr/local/ && \
-    rm -rf FEX-2409-Ubuntu-22.04-aarch64*
+# Note: We use Hangover's prebuilt Wine and emulator DLLs; no host Box64/FEX needed.
 
 # Download and install pre-built hangover binary
 WORKDIR /opt
@@ -98,13 +58,10 @@ RUN wget https://github.com/AndreRH/hangover/releases/download/hangover-10.14/ha
 
 # Install hangover wine and emulator DLLs
 RUN cd hangover_10.14_debian12_bookworm_arm64 && \
-    # Install wine
+    mkdir -p /usr/local/lib/wine/aarch64-windows && \
     cp -r wine/* /usr/local/ && \
-    # Install FEX emulator DLLs
-    cp fex/*.dll /usr/local/lib/wine/aarch64-windows/ && \
-    # Install Box64 emulator DLLs  
-    cp box64/*.dll /usr/local/lib/wine/aarch64-windows/ && \
-    # Clean up
+    cp -f fex/*.dll /usr/local/lib/wine/aarch64-windows/ || true && \
+    cp -f box64/*.dll /usr/local/lib/wine/aarch64-windows/ || true && \
     cd .. && rm -rf hangover_10.14_debian12_bookworm_arm64
 
 # Create helper scripts directory
