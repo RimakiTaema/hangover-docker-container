@@ -1,0 +1,42 @@
+version: '3.8'
+
+services:
+  hangover:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    platform: linux/arm64
+    container_name: hangover
+    ports:
+      - "5901:5901"  # VNC port for GUI mode
+    volumes:
+      - wine_data:/home/wine/.wine
+      - ./apps:/home/wine/apps  # Mount directory for Windows applications
+    environment:
+      - VNC_PORT=5901
+      - DISPLAY=:1
+    stdin_open: true
+    tty: true
+    # For GUI mode (default)
+    command: ["/opt/scripts/wine-gui.sh"]
+    
+  hangover-cli:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    platform: linux/arm64
+    container_name: hangover-cli
+    volumes:
+      - wine_data:/home/wine/.wine
+      - ./apps:/home/wine/apps  # Mount directory for Windows applications
+    environment:
+      - WINEDEBUG=-all
+      - WINEPREFIX=/home/wine/.wine
+    stdin_open: true
+    tty: true
+    # For CLI mode
+    command: ["/opt/scripts/wine-cli.sh", "bash"]
+
+volumes:
+  wine_data:
+    driver: local
