@@ -126,8 +126,13 @@ echo "Starting X server..."
 Xvfb :1 -screen 0 1024x768x24 -ac +extension GLX +render -noreset &
 XVFB_PID=$!
 
-# Wait for X server to start
-sleep 2
+# Wait for X server to start (poll for socket up to ~10s)
+for i in $(seq 1 40); do
+    if [ -S /tmp/.X11-unix/X1 ]; then
+        break
+    fi
+    sleep 0.25
+done
 
 # Start window manager
 echo "Starting window manager..."
@@ -136,7 +141,7 @@ WM_PID=$!
 
 # Start VNC server
 echo "Starting VNC server on port $VNC_PORT..."
-x11vnc -display :1 -rfbport 5901 -localhost -forever -shared -ncache 10 -passwd hangover
+x11vnc -display :1 -rfbport "$VNC_PORT" -listen 0.0.0.0 -forever -shared -nopw -xkb &
 VNC_PID=$!
 
 # Wait for VNC to start
@@ -144,7 +149,7 @@ sleep 2
 
 echo "Hangover GUI mode ready!"
 echo "Using pre-built hangover 10.14 with FEX and Box64 emulators"
-echo "VNC server running on port $VNC_PORT"
+echo "VNC server running on port $VNC_PORT (no password)"
 echo "Connect with: vncviewer localhost:$VNC_PORT"
 echo ""
 echo "Available emulators:"
