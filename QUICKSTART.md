@@ -71,7 +71,7 @@ hangover-docker/
 
 - **Host**: localhost
 - **Port**: 5901
-- **Password**: None required
+- **Password**: hangover
 
 ## 📋 Requirements
 
