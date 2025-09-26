@@ -54,8 +54,11 @@ RUN useradd -m -s /bin/bash wine && \
 WORKDIR /opt
 RUN wget https://github.com/AndreRH/hangover/releases/download/hangover-10.14/hangover_10.14_debian12_bookworm_arm64.tar && \
     tar -xvf hangover_10.14_debian12_bookworm_arm64.tar && \
-    rm hangover_10.14_debian12_bookworm_arm64.tar
-
+    rm hangover_10.14_debian12_bookworm_arm64.tar && \
+    apt-get update && \
+    apt-get install -y ./hangover*.deb && \
+    rm -f ./hangover*.deb
+    
 # Install hangover wine and emulator DLLs
 RUN cd hangover_10.14_debian12_bookworm_arm64 && \
     mkdir -p /usr/local/lib/wine/aarch64-windows && \
