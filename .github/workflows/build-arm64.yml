@@ -1,0 +1,55 @@
+name: Hangover Build (ARM64) - From Source
+
+on:
+  push:
+    branches: [ main, master ]
+    paths:
+      - 'hangover/**'
+      - '.github/workflows/build-arm64.yml'
+  pull_request:
+    branches: [ main, master ]
+    paths:
+      - 'hangover/**'
+      - '.github/workflows/build-arm64.yml'
+  workflow_dispatch: {}
+
+jobs:
+  build:
+    name: Build Hangover from Source (linux/arm64)
+    runs-on: ubuntu-24.04-arm64
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            build-essential cmake ninja-build pkg-config \
+            git curl wget ca-certificates gnupg \
+            wine wine32 wine64 libwine libwine-dev \
+            xvfb x11vnc fluxbox xterm \
+            libc6-dev libgcc-s1 libstdc++6 \
+            libx11-6 libxext6 libxrender1 libxrandr2 libxss1 libxtst6 libxi6 libxinerama1 libxcomposite1 libxcursor1 libxdamage1 libxfixes3 libxpm4 libxmu6 libxft2 libxau6 libxdmcp6 libxxf86vm1 \
+            fonts-dejavu-core fonts-liberation
+
+      - name: Build hangover wine
+        working-directory: hangover
+        run: |
+          mkdir -p wine/build
+          cd wine/build
+          ../configure --disable-tests --with-mingw=clang --enable-archs=arm64ec,aarch64,i386
+          make -j"$(nproc)"
+
+      - name: Tar artifacts
+        run: |
+          mkdir -p artifact
+          tar -C hangover -cvf artifact/hangover_build_arm64.tar wine/build
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: hangover-build-arm64
+          path: artifact/hangover_build_arm64.tar

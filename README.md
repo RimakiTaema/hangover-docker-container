@@ -1,5 +1,8 @@
 # Hangover Docker Image
 
+![Docker (ARM64) - Build and Push](https://github.com/${{github.repository}}/actions/workflows/docker-arm64.yml/badge.svg)
+![Hangover Build (ARM64) - From Source](https://github.com/${{github.repository}}/actions/workflows/build-arm64.yml/badge.svg)
+
 A Docker image for running Windows applications on ARM64 Linux using the [Hangover project](https://github.com/AndreRH/hangover). This image uses pre-built binaries from GitHub releases and supports both CLI and GUI modes with Wine, Box64, and FEX emulation.
 
 ## Features
@@ -193,6 +196,11 @@ The Docker image uses the pre-built hangover binary from GitHub releases:
 - Pre-compiled Box64 emulator for i386 applications
 
 Build process takes approximately 2-3 minutes on a modern ARM64 system.
+
+## CI (ARM64)
+
+- Docker image is built and pushed on ARM64 via GitHub Actions using `ubuntu-24.04-arm64` runners. See `.github/workflows/docker-arm64.yml`.
+- Source build workflow compiles Hangover on ARM64 and uploads artifacts. See `.github/workflows/build-arm64.yml`.
 
 ## Contributing
 
