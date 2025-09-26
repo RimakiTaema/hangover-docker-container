@@ -6,4 +6,4 @@ echo "VNC will be available on port 5901"
 echo "Connect with: vncviewer localhost:5901"
 echo ""
 
-docker-compose up hangover
+docker compose up hangover

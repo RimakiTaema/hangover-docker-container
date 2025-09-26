@@ -1,9 +1,10 @@
 # Hangover Docker Image
 
-A Docker image for running Windows applications on ARM64 Linux using the [Hangover project](https://github.com/AndreRH/hangover). This image supports both CLI and GUI modes with Wine, Box64, and FEX emulation.
+A Docker image for running Windows applications on ARM64 Linux using the [Hangover project](https://github.com/AndreRH/hangover). This image uses pre-built binaries from GitHub releases and supports both CLI and GUI modes with Wine, Box64, and FEX emulation.
 
 ## Features
 
+- **Pre-built Binary**: Uses hangover 10.14 pre-built for Debian 12 Bookworm ARM64
 - **ARM64 Support**: Runs on ARM64 servers and devices
 - **Dual Mode**: Both CLI and GUI (VNC) modes
 - **Multiple Emulators**: 
@@ -12,6 +13,7 @@ A Docker image for running Windows applications on ARM64 Linux using the [Hangov
   - Wine for native ARM64 applications
 - **VNC GUI**: Access GUI applications via VNC on port 5901
 - **Helper Scripts**: Easy-to-use scripts for common tasks
+- **Fast Setup**: Quick 2-3 minute build time using pre-built binaries
 
 ## Quick Start
 
@@ -23,7 +25,14 @@ A Docker image for running Windows applications on ARM64 Linux using the [Hangov
 ### Building the Image
 
 ```bash
-docker-compose build
+docker compose build
+```
+
+### Testing the Setup
+
+```bash
+# Run the test script to verify everything works
+./scripts/test-setup.sh
 ```
 
 ### Running in GUI Mode (Default)
@@ -33,7 +42,7 @@ docker-compose build
 ./scripts/run-gui.sh
 
 # Or manually
-docker-compose up hangover
+docker compose up hangover
 ```
 
 Connect to the GUI using any VNC client:
@@ -51,7 +60,7 @@ Connect to the GUI using any VNC client:
 ./scripts/run-cli.sh wine /path/to/app.exe
 
 # Or manually
-docker-compose run --rm hangover-cli wine /path/to/app.exe
+docker compose run --rm hangover-cli wine /path/to/app.exe
 ```
 
 ## Usage Examples
@@ -130,7 +139,7 @@ The container supports multiple emulators. You can specify which one to use:
 
 ```bash
 # Use a custom wine prefix
-docker-compose run --rm -e WINEPREFIX=/custom/path hangover-cli wine app.exe
+docker compose run --rm -e WINEPREFIX=/custom/path hangover-cli wine app.exe
 ```
 
 ### DXVK Support
@@ -164,25 +173,26 @@ For better graphics performance with DirectX applications:
 
 ```bash
 # Enable Wine debug output
-docker-compose run --rm -e WINEDEBUG=+all hangover-cli wine app.exe
+docker compose run --rm -e WINEDEBUG=+all hangover-cli wine app.exe
 ```
 
 ### Logs
 
 ```bash
 # View container logs
-docker-compose logs hangover
+docker compose logs hangover
 ```
 
-## Building from Source
+## Pre-built Binary Installation
 
-The Docker image builds Hangover from source, including:
+The Docker image uses the pre-built hangover binary from GitHub releases:
 
-- Wine with ARM64EC, AArch64, and i386 support
-- FEX emulator for x86_64 applications
-- Box64 emulator for i386 applications
+- Downloads hangover 10.14 for Debian 12 Bookworm ARM64
+- Includes Wine with ARM64EC, AArch64, and i386 support
+- Pre-compiled FEX emulator for x86_64 applications
+- Pre-compiled Box64 emulator for i386 applications
 
-Build process takes approximately 10-15 minutes on a modern ARM64 system.
+Build process takes approximately 2-3 minutes on a modern ARM64 system.
 
 ## Contributing
 

@@ -1,5 +1,6 @@
 # Multi-stage Dockerfile for Hangover - Windows application emulation on ARM64
 # Supports both CLI and GUI modes with Wine, Box64, and FEX
+# Uses pre-built hangover binary from GitHub releases
 
 FROM --platform=linux/arm64 debian:bookworm-slim as base
 
@@ -20,11 +21,7 @@ RUN apt-get update && apt-get install -y \
     ca-certificates \
     gnupg \
     software-properties-common \
-    # Build dependencies
-    build-essential \
-    cmake \
-    ninja-build \
-    pkg-config \
+    tar \
     # Wine dependencies
     wine \
     wine32 \
@@ -93,40 +90,22 @@ RUN wget https://github.com/FEX-Emu/FEX/releases/download/FEX-2409/FEX-2409-Ubun
     cp -r FEX-2409-Ubuntu-22.04-aarch64/* /usr/local/ && \
     rm -rf FEX-2409-Ubuntu-22.04-aarch64*
 
-# Clone and build hangover
+# Download and install pre-built hangover binary
 WORKDIR /opt
-RUN git clone --recursive https://github.com/AndreRH/hangover.git
+RUN wget https://github.com/AndreRH/hangover/releases/download/hangover-10.14/hangover_10.14_debian12_bookworm_arm64.tar && \
+    tar -xvf hangover_10.14_debian12_bookworm_arm64.tar && \
+    rm hangover_10.14_debian12_bookworm_arm64.tar
 
-# Build hangover wine
-WORKDIR /opt/hangover
-RUN mkdir -p wine/build && \
-    cd wine/build && \
-    ../configure --disable-tests --with-mingw=clang --enable-archs=arm64ec,aarch64,i386 && \
-    make -j$(nproc) && \
-    make install
-
-# Build FEX emulator DLLs
-WORKDIR /opt/hangover/fex
-RUN mkdir -p build_ec && \
-    cd build_ec && \
-    cmake -DCMAKE_BUILD_TYPE=RelWithDebInfo \
-          -DCMAKE_TOOLCHAIN_FILE=../Data/CMake/toolchain_mingw.cmake \
-          -DENABLE_LTO=False \
-          -DMINGW_TRIPLE=arm64ec-w64-mingw32 \
-          -DBUILD_TESTS=False .. && \
-    make -j$(nproc) arm64ecfex && \
-    cp Bin/libarm64ecfex.dll /usr/local/lib/wine/aarch64-windows/
-
-# Build Box64 emulator DLL
-WORKDIR /opt/hangover/box64
-RUN mkdir -p build_pe && \
-    cd build_pe && \
-    cmake -DCMAKE_BUILD_TYPE=Release \
-          -DCMAKE_C_COMPILER=aarch64-linux-gnu-gcc \
-          -DARM_DYNAREC=ON \
-          -DWOW64=ON .. && \
-    make -j$(nproc) wowbox64 && \
-    cp wowbox64-prefix/src/wowbox64-build/wowbox64.dll /usr/local/lib/wine/aarch64-windows/
+# Install hangover wine and emulator DLLs
+RUN cd hangover_10.14_debian12_bookworm_arm64 && \
+    # Install wine
+    cp -r wine/* /usr/local/ && \
+    # Install FEX emulator DLLs
+    cp fex/*.dll /usr/local/lib/wine/aarch64-windows/ && \
+    # Install Box64 emulator DLLs  
+    cp box64/*.dll /usr/local/lib/wine/aarch64-windows/ && \
+    # Clean up
+    cd .. && rm -rf hangover_10.14_debian12_bookworm_arm64
 
 # Create helper scripts directory
 RUN mkdir -p /opt/scripts
@@ -145,11 +124,12 @@ if [ ! -d "$WINEPREFIX" ]; then
     winecfg
 fi
 
-# Set emulator DLLs
+# Set emulator DLLs (using pre-built hangover DLLs)
 export HODLL64=libarm64ecfex.dll  # For x86_64 emulation (FEX)
 export HODLL=wowbox64.dll         # For i386 emulation (Box64)
 
 echo "Hangover CLI mode ready!"
+echo "Using pre-built hangover 10.14 with FEX and Box64 emulators"
 echo "Available emulators:"
 echo "  x86_64: FEX (libarm64ecfex.dll)"
 echo "  i386: Box64 (wowbox64.dll)"
@@ -177,7 +157,7 @@ if [ ! -d "$WINEPREFIX" ]; then
     winecfg
 fi
 
-# Set emulator DLLs
+# Set emulator DLLs (using pre-built hangover DLLs)
 export HODLL64=libarm64ecfex.dll  # For x86_64 emulation (FEX)
 export HODLL=wowbox64.dll         # For i386 emulation (Box64)
 
@@ -203,6 +183,7 @@ VNC_PID=$!
 sleep 2
 
 echo "Hangover GUI mode ready!"
+echo "Using pre-built hangover 10.14 with FEX and Box64 emulators"
 echo "VNC server running on port $VNC_PORT"
 echo "Connect with: vncviewer localhost:$VNC_PORT"
 echo ""
