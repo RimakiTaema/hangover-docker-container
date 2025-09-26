@@ -38,6 +38,13 @@ docker compose build
 ./scripts/test-setup.sh
 ```
 
+### Running Unit Tests
+
+```bash
+# Validate Dockerfile and docker-compose configuration
+./scripts/test.sh
+```
+
 ### Running in GUI Mode (Default)
 
 ```bash
