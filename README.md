@@ -199,8 +199,8 @@ Build process takes approximately 2-3 minutes on a modern ARM64 system.
 
 ## CI (ARM64)
 
-- Docker image is built and pushed on ARM64 via GitHub Actions using `ubuntu-24.04-arm64` runners. See `.github/workflows/docker-arm64.yml`.
-- Source build workflow compiles Hangover on ARM64 and uploads artifacts. See `.github/workflows/build-arm64.yml`.
+- Docker image build tries native ARM runners when the repo is public; otherwise it defaults to QEMU emulation automatically. See `.github/workflows/docker-arm64.yml`.
+- Source build workflow also prefers native ARM runners when public, with a QEMU fallback on private repos or when capacity is unavailable. See `.github/workflows/build-arm64.yml`.
 
 ## Contributing
 

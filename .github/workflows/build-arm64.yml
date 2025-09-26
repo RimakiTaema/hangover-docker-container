@@ -18,6 +18,7 @@ jobs:
     name: Native ARM64 build (ubuntu-24.04-arm)
     runs-on: ubuntu-24.04-arm
     timeout-minutes: 60
+    if: github.event.repository.private == false
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -59,7 +60,7 @@ jobs:
     name: Fallback emulated build (ubuntu-24.04 + cross/QEMU)
     runs-on: ubuntu-24.04
     needs: build-native
-    if: needs.build-native.result != 'success'
+    if: github.event.repository.private == true || needs.build-native.result != 'success'
     steps:
       - name: Checkout
         uses: actions/checkout@v4

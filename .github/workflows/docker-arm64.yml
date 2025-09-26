@@ -22,6 +22,7 @@ jobs:
     name: Native ARM64 build (ubuntu-24.04-arm)
     runs-on: ubuntu-24.04-arm
     timeout-minutes: 45
+    if: github.event.repository.private == false
     permissions:
       contents: read
       packages: write
@@ -79,7 +80,7 @@ jobs:
     name: Fallback emulated build (ubuntu-24.04 + QEMU)
     runs-on: ubuntu-24.04
     needs: build-native
-    if: needs.build-native.result != 'success'
+    if: github.event.repository.private == true || needs.build-native.result != 'success'
     permissions:
       contents: read
       packages: write
